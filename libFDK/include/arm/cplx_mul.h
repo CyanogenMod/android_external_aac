@@ -97,6 +97,15 @@ amm-info@iis.fraunhofer.de
   //#define FUNCTION_cplxMult_32x16X2
 #endif
 
+#if defined(__thumb__) && !defined(__thumb2__)
+#  define  __SWITCH_TO_ARM \
+            ".align\n" \
+            ".arm\n"
+
+#else
+#  define  __SWITCH_TO_ARM   /* nothing */
+#endif
+
 #define FUNCTION_cplxMultDiv2_32x32X2
 //#define FUNCTION_cplxMult_32x32X2
 
@@ -110,7 +119,8 @@ inline void cplxMultDiv2( FIXP_DBL *c_Re,
    LONG tmp1,tmp2;
    const LONG w = wpk.w;
 
-   asm("smulwt %0, %3, %4;\n"
+   asm(__SWITCH_TO_ARM
+       "smulwt %0, %3, %4;\n"
        "rsb %1,%0,#0;\n"
        "smlawb %0, %2, %4, %1;\n"
        "smulwt %1, %2, %4;\n"
@@ -134,7 +144,8 @@ inline void cplxMultDiv2( FIXP_DBL *c_Re,
 {
     LONG tmp1, tmp2;
 
-    asm("smulwb %0, %3, %5;\n"     /* %7   = -a_Im * b_Im */
+    asm(__SWITCH_TO_ARM
+        "smulwb %0, %3, %5;\n"     /* %7   = -a_Im * b_Im */
         "rsb %1,%0,#0;\n"
         "smlawb %0, %2, %4, %1;\n" /* tmp1 =  a_Re * b_Re - a_Im * b_Im */
         "smulwb %1, %2, %5;\n"     /* %7   =  a_Re * b_Im */
@@ -158,7 +169,8 @@ inline void cplxMultAddDiv2( FIXP_DBL *c_Re,
 {
     LONG tmp1, tmp2;
 
-    asm("smulwb %0, %3, %5;\n"
+    asm(__SWITCH_TO_ARM
+        "smulwb %0, %3, %5;\n"
         "rsb %1,%0,#0;\n"
         "smlawb %0, %2, %4, %1;\n"
         "smulwb %1, %2, %5;\n"
@@ -185,6 +197,7 @@ inline void cplxMultDiv2( FIXP_DBL *c_Re,
 
 #ifdef __ARM_ARCH_6__
     asm(
+       __SWITCH_TO_ARM
        "smmul %0, %2, %4;\n"     /* tmp1  = a_Re * b_Re */
        "smmls %0, %3, %5, %0;\n" /* tmp1 -= a_Im * b_Im */
        "smmul %1, %2, %5;\n"     /* tmp2  = a_Re * b_Im */

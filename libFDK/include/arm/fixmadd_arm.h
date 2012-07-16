@@ -96,11 +96,20 @@ amm-info@iis.fraunhofer.de
     /* ARM GNU GCC */
 
     #define FUNCTION_fixmadddiv2_DD
+    #if defined(__thumb__) && !defined(__thumb2__)
+    #  define  __SWITCH_TO_ARM \
+                ".align\n" \
+                ".arm\n"
+
+    #else
+    #  define  __SWITCH_TO_ARM   /* nothing */
+    #endif
 
     #ifdef __ARM_ARCH_6__
       inline FIXP_DBL fixmadddiv2_DD (FIXP_DBL x, const FIXP_DBL a, const FIXP_DBL b) {
         INT result;
-        asm  ("smmla %0, %1, %2, %3;\n"
+        asm  (__SWITCH_TO_ARM
+              "smmla %0, %1, %2, %3;\n"
               : "=r" (result)
               : "r" (a), "r" (b), "r"(x) );
         return result ;
@@ -108,7 +117,8 @@ amm-info@iis.fraunhofer.de
       #define FUNCTION_fixmsubdiv2_DD
       inline FIXP_DBL fixmsubdiv2_DD (FIXP_DBL x, const FIXP_DBL a, const FIXP_DBL b) {
         INT result;
-        asm  ("smmls %0, %1, %2, %3;\n"
+        asm  (__SWITCH_TO_ARM
+              "smmls %0, %1, %2, %3;\n"
               : "=r" (result)
               : "r" (a), "r" (b), "r"(x) );
         return result ;
@@ -116,7 +126,8 @@ amm-info@iis.fraunhofer.de
     #else /* __ARM_ARCH_6__ */
       inline FIXP_DBL fixmadddiv2_DD (FIXP_DBL x, const FIXP_DBL a, const FIXP_DBL b) {
         INT discard, result = x;
-        asm  ("smlal %0, %1, %2, %3;\n"
+        asm  (__SWITCH_TO_ARM
+              "smlal %0, %1, %2, %3;\n"
               : "=r" (discard), "+r" (result)
               : "r" (a), "r" (b) );
         return result ;
@@ -129,7 +140,8 @@ amm-info@iis.fraunhofer.de
 
       inline FIXP_DBL fixmadddiv2_DS (FIXP_DBL x, const FIXP_DBL a, const FIXP_SGL b) {
         INT result;
-        asm("smlawb %0, %1, %2, %3 "
+        asm(__SWITCH_TO_ARM
+              "smlawb %0, %1, %2, %3 "
               : "=r" (result)
               : "r" (a), "r" (b), "r" (x) );
         return result ;

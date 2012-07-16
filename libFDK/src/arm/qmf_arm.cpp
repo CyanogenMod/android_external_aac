@@ -119,6 +119,15 @@ qmfForwardModulationLP_odd( HANDLE_QMF_FILTER_BANK anaQmf, /*!< Handle of Qmf An
 
 #if defined(__ARM_ARCH_6__) || defined(__ARM_ARCH_5TE__)
 
+#if defined(__thumb__) && !defined(__thumb2__)
+#  define  __SWITCH_TO_ARM \
+            ".align\n" \
+            ".arm\n"
+
+#else
+#  define  __SWITCH_TO_ARM   /* nothing */
+#endif
+
 #if (SAMPLE_BITS == 16)
 #define FUNCTION_qmfAnaPrototypeFirSlot
 #endif
@@ -130,7 +139,8 @@ qmfForwardModulationLP_odd( HANDLE_QMF_FILTER_BANK anaQmf, /*!< Handle of Qmf An
 inline INT SMULBB (const SHORT a, const LONG b)
 {
   INT result ;
-  __asm__ ("smulbb %0, %1, %2"
+  __asm__ (__SWITCH_TO_ARM
+     "smulbb %0, %1, %2"
      : "=r" (result)
      : "r" (a), "r" (b)) ;
   return result ;
@@ -138,7 +148,8 @@ inline INT SMULBB (const SHORT a, const LONG b)
 inline INT SMULBT (const SHORT a, const LONG b)
 {
   INT result ;
-  __asm__ ("smulbt %0, %1, %2"
+  __asm__ (__SWITCH_TO_ARM
+     "smulbt %0, %1, %2"
      : "=r" (result)
      : "r" (a), "r" (b)) ;
   return result ;
@@ -147,7 +158,8 @@ inline INT SMULBT (const SHORT a, const LONG b)
 inline INT SMLABB(const LONG accu, const SHORT a, const LONG b)
 {
   INT result ;
-  __asm__ ("smlabb %0, %1, %2,%3"
+  __asm__ (__SWITCH_TO_ARM
+     "smlabb %0, %1, %2,%3"
      : "=r" (result)
      : "r" (a), "r" (b), "r" (accu)) ;
   return result;
@@ -155,7 +167,8 @@ inline INT SMLABB(const LONG accu, const SHORT a, const LONG b)
 inline INT SMLABT(const LONG accu, const SHORT a, const LONG b)
 {
   INT result ;
-  __asm__ ("smlabt %0, %1, %2,%3"
+  __asm__ (__SWITCH_TO_ARM
+     "smlabt %0, %1, %2,%3"
      : "=r" (result)
      : "r" (a), "r" (b), "r" (accu)) ;
   return result;
@@ -424,7 +437,8 @@ void qmfAnaPrototypeFirSlot( FIXP_QMF *analysisBuffer,
 inline INT SMULWB (const LONG a, const LONG b)
 {
   INT result ;
-  __asm__ ("smulwb %0, %1, %2"
+  __asm__ (__SWITCH_TO_ARM
+    "smulwb %0, %1, %2"
     : "=r" (result)
     : "r" (a), "r" (b)) ;
 
@@ -433,7 +447,8 @@ inline INT SMULWB (const LONG a, const LONG b)
 inline INT SMULWT (const LONG a, const LONG b)
 {
   INT result ;
-  __asm__ ("smulwt %0, %1, %2"
+  __asm__ (__SWITCH_TO_ARM
+    "smulwt %0, %1, %2"
     : "=r" (result)
     : "r" (a), "r" (b)) ;
 
@@ -443,7 +458,8 @@ inline INT SMULWT (const LONG a, const LONG b)
 inline INT SMLAWB(const LONG accu, const LONG a, const LONG b)
 {
   INT result;
-  asm("smlawb %0, %1, %2, %3 "
+  asm(__SWITCH_TO_ARM
+        "smlawb %0, %1, %2, %3 "
         : "=r" (result)
         : "r" (a), "r" (b), "r" (accu) );
   return result ;
@@ -452,7 +468,8 @@ inline INT SMLAWB(const LONG accu, const LONG a, const LONG b)
 inline INT SMLAWT(const LONG accu, const LONG a, const LONG b)
 {
   INT result;
-  asm("smlawt %0, %1, %2, %3 "
+  asm(__SWITCH_TO_ARM
+        "smlawt %0, %1, %2, %3 "
         : "=r" (result)
         : "r" (a), "r" (b), "r" (accu) );
   return result ;

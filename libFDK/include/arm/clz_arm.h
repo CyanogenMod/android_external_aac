@@ -92,6 +92,14 @@ amm-info@iis.fraunhofer.de
 
 #if defined(__GNUC__) && defined(__ARM_ARCH_5TE__)	/* cppp replaced: elif */
   /* ARM gcc*/
+#if defined(__thumb__) && !defined(__thumb2__)
+#  define  __SWITCH_TO_ARM \
+            ".align\n" \
+            ".arm\n"
+
+#else
+#  define  __SWITCH_TO_ARM   /* nothing */
+#endif
 
   #define FUNCTION_fixnormz_D
   #define FUNCTION_fixnorm_D
@@ -99,7 +107,7 @@ amm-info@iis.fraunhofer.de
   inline INT fixnormz_D(LONG value)
   {
     INT result;
-    asm("clz %0, %1 ": "=r"(result) : "r"(value) );
+    asm(__SWITCH_TO_ARM "clz %0, %1 ": "=r"(result) : "r"(value) );
     return result;
   }
 

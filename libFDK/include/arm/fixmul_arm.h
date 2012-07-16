@@ -93,6 +93,15 @@ amm-info@iis.fraunhofer.de
 #if defined(__GNUC__) && defined(__arm__)	/* cppp replaced: elif */
 /* ARM with GNU compiler */
 
+#if defined(__thumb__) && !defined(__thumb2__)
+#  define  __SWITCH_TO_ARM \
+            ".align\n" \
+            ".arm\n"
+
+#else
+#  define  __SWITCH_TO_ARM   /* nothing */
+#endif
+
 #define FUNCTION_fixmuldiv2_DD
 
 #define FUNCTION_fixmuldiv2BitExact_DD
@@ -110,7 +119,7 @@ amm-info@iis.fraunhofer.de
 inline INT fixmuldiv2_DD (const INT a, const INT b)
 {
   INT result ;
-  __asm__ ("smmul %0, %1, %2" : "=r" (result)
+  __asm__ (__SWITCH_TO_ARM "smmul %0, %1, %2" : "=r" (result)
                               : "r" (a), "r" (b)) ;
   return result ;
 }
@@ -129,7 +138,8 @@ inline INT fixmuldiv2_DD (const INT a, const INT b)
 inline INT fixmuldiv2_SD (const SHORT a, const INT b)
 {
   INT result ;
-  __asm__ ("smulwb %0, %1, %2"
+  __asm__ (__SWITCH_TO_ARM 
+    "smulwb %0, %1, %2"
     : "=r" (result)
     : "r" (b), "r" (a)) ;
   return result ;
