@@ -107,19 +107,21 @@ inline void cplxMultDiv2( FIXP_DBL *c_Re,
                           FIXP_DBL  b_Re,
                           FIXP_DBL  b_Im)
 {
-   INT result;
+  INT result;
 
    __asm__ ("mult %[a_Re], %[b_Re];\n"
             "msub %[a_Im], %[b_Im];\n"
-       : "=hi"(result)
-       : [a_Re]"r"(a_Re), [b_Re]"r"(b_Re),  [a_Im]"r"(a_Im), [b_Im]"r"(b_Im)
+            "mfhi %[result];\n"
+       : [result]"=r"(result)
+       : [a_Re]"d"(a_Re), [b_Re]"d"(b_Re),  [a_Im]"d"(a_Im), [b_Im]"d"(b_Im)
        : "lo");
 
    *c_Re = result;
 
    __asm__ ("mult %[a_Re], %[b_Im];\n"
             "madd %[a_Im], %[b_Re];\n"
-       : "=hi"(result)
+            "mfhi %[result];\n"
+       : [result]"=r"(result) 
        : [a_Re]"r"(a_Re), [b_Im]"r"(b_Im), [a_Im]"r"(a_Im), [b_Re]"r"(b_Re)
        : "lo");
    *c_Im = result;
@@ -134,17 +136,22 @@ inline void cplxMult( FIXP_DBL *c_Re,
                       FIXP_DBL  b_Re,
                       FIXP_DBL  b_Im)
 {
-   INT result;
+  INT result;
+
    __asm__ ("mult %[a_Re], %[b_Re];\n"
             "msub %[a_Im], %[b_Im];\n"
-        : "=hi"(result)
+            "mfhi %[result];\n"
+            //"extr_w %[result], 31;\n"
+        : [result]"=r"(result)
         : [a_Re]"r"(a_Re), [b_Re]"r"(b_Re), [a_Im]"r"(a_Im), [b_Im]"r"(b_Im)
         : "lo");
    *c_Re = result<<1;
 
    __asm__ ("mult %[a_Re], %[b_Im];\n"
             "madd %[a_Im], %[b_Re];\n"
-        : "=hi"(result)
+            "mfhi %[result];\n"
+            //"extr_w %[result], 31;\n"
+        : [result]"=r"(result)
         : [a_Re]"r"(a_Re), [b_Im]"r"(b_Im), [a_Im]"r"(a_Im), [b_Re]"r"(b_Re)
         : "lo");
    *c_Im = result<<1;
