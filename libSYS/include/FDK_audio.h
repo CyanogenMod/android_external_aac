@@ -198,6 +198,7 @@ typedef enum
   AOT_LD_MPEGS         = 44, /**< Low Delay MPEG Surround                   */
 
   /* Pseudo AOTs */
+  AOT_MP2_AAC_LC       = 129, /**< Virtual AOT MP2 Low Complexity profile                 */
   AOT_DRM_AAC          = 143, /**< Virtual AOT for DRM (ER-AAC-SCAL without SBR)          */
   AOT_DRM_SBR          = 144, /**< Virtual AOT for DRM (ER-AAC-SCAL with SBR)             */
   AOT_DRM_MPEG_PS      = 145  /**< Virtual AOT for DRM (ER-AAC-SCAL with SBR and MPEG-PS) */

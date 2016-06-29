@@ -368,7 +368,8 @@ static SBR_PS_SIGNALING getSbrSignalingMode(
     sbrSignaling = SIG_IMPLICIT; /* default: implicit signaling */
   }
 
-  if ( (audioObjectType==AOT_AAC_LC) || (audioObjectType==AOT_SBR) || (audioObjectType==AOT_PS) ) {
+  if ( (audioObjectType==AOT_AAC_LC) || (audioObjectType==AOT_SBR) ||
+       (audioObjectType==AOT_PS)     || (audioObjectType==AOT_MP2_AAC_LC) ) {
     switch (transportType) {
       case TT_MP4_ADIF:
       case TT_MP4_ADTS:
@@ -424,7 +425,13 @@ static void FDKaacEnc_MapConfig(
 
   cc->flags = 0;
 
-  transport_AOT = hAacConfig->audioObjectType;
+  switch (hAacConfig->audioObjectType) {
+    case AOT_MP2_AAC_LC:
+      transport_AOT = AOT_AAC_LC;
+      break;
+    default :
+      transport_AOT = hAacConfig->audioObjectType;
+  }
 
   if (hAacConfig->audioObjectType == AOT_ER_AAC_ELD) {
     cc->flags |= (hAacConfig->syntaxFlags & AC_SBR_PRESENT) ? CC_SBR : 0;
@@ -490,7 +497,14 @@ static void FDKaacEnc_MapConfig(
   cc->samplingRate    = hAacConfig->sampleRate;
 
   /* Mpeg-4 signaling for transport library. */
-  cc->flags |= CC_MPEG_ID;
+  switch ( hAacConfig->audioObjectType ) {
+    case AOT_MP2_AAC_LC:
+      cc->flags &= ~CC_MPEG_ID; /* Required for ADTS. */
+      cc->extAOT = AOT_NULL_OBJECT;
+      break;
+    default:
+      cc->flags |= CC_MPEG_ID;
+  }
 
   /* ER-tools signaling. */
   cc->flags     |= (hAacConfig->syntaxFlags & AC_ER_VCB11) ? CC_VCB11 : 0;
@@ -772,6 +786,8 @@ AACENC_ERROR FDKaacEnc_AdjustEncSettings(HANDLE_AACENCODER hAacEncoder,
 
     /* Adapt internal AOT when necessary. */
     switch ( hAacConfig->audioObjectType ) {
+      case AOT_MP2_AAC_LC:
+          hAacConfig->usePns = 0;
       case AOT_AAC_LC:
       case AOT_SBR:
       case AOT_PS:
@@ -1786,6 +1802,7 @@ AACENC_ERROR aacEncoder_SetParam(
                   goto bail;
                 }
               case AOT_AAC_LC:
+              case AOT_MP2_AAC_LC:
               case AOT_ER_AAC_LD:
               case AOT_ER_AAC_ELD:
                 if (!(hAacEncoder->encoder_modis & (ENC_MODE_FLAG_AAC))) {
